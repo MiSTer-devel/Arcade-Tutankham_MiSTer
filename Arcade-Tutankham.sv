@@ -39,7 +39,7 @@ module emu
 	input         RESET,
 
 	//Must be passed to hps_io module
-	inout  [45:0] HPS_BUS,
+	inout  [48:0] HPS_BUS,
 
 	//Base video clock. Usually equals to CLK_SYS.
 	output        CLK_VIDEO,
@@ -193,7 +193,6 @@ assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
 assign {SDRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
 
 assign VGA_F1 = 0;
-assign VGA_SL = 0;
 assign VGA_SCALER = 0;
 assign VGA_DISABLE = 0;
 assign FB_FORCE_BLANK = 0;
@@ -271,6 +270,7 @@ hps_io #(.CONF_STR(CONF_STR)) hps_io
 	.EXT_BUS(),
 	.gamma_bus(gamma_bus),
 	.direct_video(direct_video),
+	.video_rotated(video_rotated),
 
 	.forced_scandoubler(forced_scandoubler),
 
