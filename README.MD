@@ -18,14 +18,6 @@ This core targets MiSTer FPGA and aims for accurate gameplay behavior, video tim
 
 ---
 
-## Screenshot
-
-<p align="center">
-  <img src="docs/tutankham_screenshot.png" width="600">
-</p>
-
----
-
 ## Game Information
 
 | Field        | Value |
