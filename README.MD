@@ -78,9 +78,10 @@ https://github.com/MiSTer-devel/Main_MiSTer/wiki/Arcade-Roms
 
 ## Installation
 
-1. Copy the core `.rbf` file to your MiSTer `/Arcade` folder.
-2. Place the appropriate ROM `.zip` file in your `/games/mame` directory.
-3. Launch the core from the MiSTer Arcade menu.
+1. Copy the core `.rbf` file to your MiSTer `/_Arcade/cores` folder.
+2. Copy the '.mra' file to your MiSTer '/_Arcade' folder.
+3. Place the appropriate ROM `.zip` files in your `/games/mame` directory.
+4. Launch the core from the MiSTer Arcade menu.
 
 ---
 
