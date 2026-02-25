@@ -1,49 +1,110 @@
----------------------------------------------------------------------------------
--- 
--- Arcade: Tutankham port to MiSTer by Rodimus
--- 09 February 2026
--- 
----------------------------------------------------------------------------------
--- A simulation model of Tutankham hardware
--- Copyright (c) Rodimus - February 2026
--- Based on the Time Pilot Core (Same exact Sound Board)
----------------------------------------------------------------------------------
--- 
--- Support screen and controls rotation on HDMI output.
--- Only controls are rotated on VGA output.
--- 
--- 
--- Joystick support : A - fire right, B - fire left, X - flash bomb, select - coin up, start - 1 player start, left shoulder - pause, right shoulder - 2 player start
--- 
-----------------------------------------------
+<p align="center">
+  <img src="Useful Information/Tutankham.png" width="800">
+</p>
 
-Hiscore save/load:
+<h1 align="center">Tutankham FPGA Core</h1>
 
-Highscore saving is untested.
+<p align="center">
+  Arcade hardware implementation for MiSTer FPGA
+</p>
 
-To save your hiscores manually, press the 'Save Settings' option in the OSD.  Hiscores will be automatically loaded when the core is started.
+---
 
-To enable automatic saving of hiscores, turn on the 'Autosave Hiscores' option and press the 'Save Settings' option in the OSD.  Hiscores will then be automatically saved (if they have changed) any time the OSD is opened.
+## Overview
 
-Hiscore data is stored in /media/fat/config/nvram/ as ```<mra filename>.nvm```
+FPGA implementation of **Tutankham (1982)**, originally developed and released by Konami.
 
----------------------------------------------------------------------------------
+This core targets MiSTer FPGA and aims for accurate gameplay behavior, video timing, and sound reproduction.
 
-                                 *** Attention ***
+---
 
-ROMs are not included. In order to use this arcade, you need to provide the
-correct ROMs.
+## Screenshot
 
-To simplify the process .mra files are provided in the releases folder, that
-specifies the required ROMs with checksums. The ROMs .zip filename refers to the
-corresponding file of the M.A.M.E. project.
+<p align="center">
+  <img src="docs/tutankham_screenshot.png" width="600">
+</p>
 
-Please refer to https://github.com/MiSTer-devel/Main_MiSTer/wiki/Arcade-Roms for
-information on how to setup and use the environment.
+---
 
-Quickreference for folders and file placement:
+## Game Information
 
-/_Arcade/<game name>.mra
-/_Arcade/cores/<game rbf>.rbf
-/_Arcade/mame/<mame rom>.zip
-/_Arcade/hbmame/<hbmame rom>.zip
+| Field        | Value |
+|--------------|--------|
+| Title        | Tutankham |
+| Year         | 1982 |
+| Developer    | Konami |
+| Genre        | Maze / Action |
+| Players      | 1–2 alternating |
+
+---
+
+## Controls
+
+Default MiSTer gamepad mapping:
+
+| Input | Action |
+|-------|--------|
+| D-Pad / Joystick | Move |
+| A | Fire Right |
+| B | Fire Left |
+| X | Flash Bomb |
+| Select | Insert Coin |
+| Start | 1 Player Start |
+| Right Shoulder | 2 Player Start |
+| Left Shoulder | Pause |
+
+---
+
+## Features
+
+- Arcade-accurate CPU timing
+- Sprite priority and layer handling
+- High score saving support
+- MiSTer-compatible .mra provided
+- Verified ROM definitions with checksums
+
+---
+
+## ROM Requirements
+
+ROM files are **not included**.
+
+To use this arcade core, you must provide legally obtained ROM files.
+
+To simplify setup:
+
+- `.mra` files are provided in the **Releases** section.
+- The `.mra` specifies all required ROM files along with checksums.
+- The ROM `.zip` filename corresponds to the naming convention used by the MAME project.
+
+For setup instructions and environment configuration, refer to:
+
+MiSTer Arcade ROM guide:  
+https://github.com/MiSTer-devel/Main_MiSTer/wiki/Arcade-Roms
+
+---
+
+## Installation
+
+1. Copy the core `.rbf` file to your MiSTer `/Arcade` folder.
+2. Place the appropriate ROM `.zip` file in your `/games/mame` directory.
+3. Launch the core from the MiSTer Arcade menu.
+
+---
+
+## Legal Notice
+
+This project contains **no copyrighted game data**.
+
+Users are responsible for obtaining and using ROM files in accordance with applicable laws.
+
+Do not request ROM files in issues or discussions.
+
+---
+
+## Credits
+
+FPGA core development: RodimusFVC 
+Original arcade game © Konami (1982)
+
+---
