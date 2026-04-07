@@ -59,6 +59,7 @@ module Tutankham_CPU
 	input         ioctl_wr,
 
 	input         pause,
+	input         flip_vertical,
 
 	input  [15:0] hs_address,
 	input   [7:0] hs_data_in,
@@ -376,14 +377,16 @@ always_ff @(posedge clk_49m) begin
 		palette_regs[cpu_A[3:0]] <= cpu_Dout;
 end
 wire [7:0] palette_D = palette_regs[cpu_A[3:0]];  // CPU read-back path
+wire flip_y_final = flip_y ^ flip_vertical;
+wire flip_x_final = flip_x ^ flip_vertical;
 
 //Video RAM (0x0000-0x7FFF, 32KB) - dual port: A=CPU, B=video scanout
 wire [7:0] videoram_D;
 wire [7:0] videoram_vout;
 // Apply flip and scroll to VRAM read coordinates (matching MAME screen_update)
-wire [7:0] eff_x = pix_x ^ {8{flip_x}};
+wire [7:0] eff_x = pix_x ^ {8{flip_x_final}};
 wire [7:0] scroll_y = (eff_x < 8'd192) ? scroll_reg : 8'd0;
-wire [7:0] eff_y = (v_cnt[7:0] ^ {8{flip_y}}) + scroll_y;
+wire [7:0] eff_y = (v_cnt[7:0] ^ {8{flip_y_final}}) + scroll_y;
 wire [14:0] vram_rd_addr = {eff_y, eff_x[7:1]};
 
 dpram_dc #(.widthad_a(15)) videoram
@@ -509,11 +512,11 @@ MC_STARS stars_gen
 	.I_V_SYNC(~video_vsync),
 //	.I_8HF(h_cnt[3] ^ flip_x),
 //	.I_256HnX(h256),
-	.I_8HF(pix_x[3] ^ flip_x),
+	.I_8HF(pix_x[3] ^ flip_x_final),
 	.I_256HnX(1'b1),
 //  .I_256HnX(pix_x[7]),
-	.I_1VF(v_cnt[0] ^ flip_y),
-	.I_2V(v_cnt[1]),
+	.I_1VF(v_cnt[0] ^ flip_y_final),
+	.I_2V(v_cnt[1] ^ flip_y_final),
 	.I_STARS_ON(stars_enable),
 	.I_STARS_OFFn(1'b1),
 	.I_PAUSEn(~pause),
