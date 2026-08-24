@@ -502,17 +502,11 @@ k082 F5
 
 //--------------------------------------------------------- Starfield ----------------------------------------------------------//
 
-// Konami 084 custom chip - starfield generator and watchdog timer.
-// Replaces the Moon Cresta MC_STARS block that previously stood in here: that
-// circuit runs its LFSR once per pixel from a 12MHz/6MHz gate and takes its
-// colour from different shift-register taps, so it produced neither the star
-// density nor the palette of the Galaxian-family generator the 084 contains.
+// Konami 084 custom chip - starfield generator and watchdog timer
 
 wire [1:0] star_r, star_g, star_b;
 
-// Pin 6, Aux Enable, is the per-pixel video gate. The bootleg board that
-// replaced the 084 gates stars on framebuffer bit 1 being clear rather than on
-// the pixel being colour 0, so stars show through half the palette indices.
+//Pin 6 Aux Enable - a star shows through any pixel with framebuffer bit 1 clear
 wire star_aux_en = ~pixel_index[1];
 
 // Pin 20 is pulsed by a read of 0x8120.
@@ -523,9 +517,7 @@ k084 F3
 	.clk(clk_49m),
 	.reset(reset),
 	.cen_6m(cen_6m),
-	.hblank(~h_cnt[8]),           //pin 3  - 082 pin 10 is /H256, so the star
-	                              //         window is the 256 counts where the
-	                              //         horizontal counter's bit 8 is set
+	.hblank(~h_cnt[8]),           //pin 3  - /H256; window is where h_cnt[8] is set
 	.vblank(vblk),                //pin 4  - 082 pin 15
 	.blank(~video_vsync),         //pin 5  - 082 pin 18 is /VSync, not a full blank
 	.aux_en(star_aux_en),         //pin 6
@@ -542,22 +534,12 @@ k084 F3
 	.star_g(star_g),              //pins 16/15
 	.star_b(star_b),              //pins 18/17
 	.star_on(),
-	.wd_reset()                   //pin 19 - deliberately unconnected, see note below
+	.wd_reset()                   //pin 19 - intentionally unconnected
 );
 
-// The 084's watchdog output is modelled but not wired to the system reset. If
-// anything else in the core is subtly mistimed a live watchdog turns that into
-// a boot loop rather than a visible glitch, which is much harder to diagnose.
-// Connect wd_reset once the rest of the board is known good.
-//
-// Worth knowing: driving pin 3 from h_cnt[8] as the schematic does puts the
-// star window at h_cnt 256-511, while hblk below puts the visible window at
-// h_cnt 269-511 plus 128-140. Both are 256 counts, so the LFSR still advances
-// the correct 512 steps per line, but they are 13 counts out of phase - which
-// shows up as a starless band at one edge. On the real board the palette buffer
-// (LS240 A2) is enabled over the same h_cnt[8] window as the stars, so the two
-// cannot disagree there; the offset is in this core's hblk, not in the 084.
-// Fixing hblk shifts the whole picture, so it is left alone here.
+//wd_reset is intentionally unconnected - a live watchdog would turn any unrelated
+//mistiming into a boot loop. hblk runs 13 counts out of phase with the 084's star
+//window, leaving a starless band at one edge; correcting it shifts the whole picture.
 
 //----------------------------------------------------- Final video output -----------------------------------------------------//
 
