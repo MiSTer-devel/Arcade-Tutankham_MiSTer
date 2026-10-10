@@ -188,6 +188,7 @@ TimePilot_SND sound_pcb
 	.sound(sound),
 	
 	.underclock(underclock),
+	.pause(pause),
 	
 	.ep7_cs_i(ep7_cs_i),
 	.ioctl_addr(ioctl_addr),

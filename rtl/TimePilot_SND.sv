@@ -45,7 +45,8 @@ module TimePilot_SND
 	//This input serves to select different fractional dividers to acheive 1.789772MHz for the sound Z80 and AY-3-8910s
 	//depending on whether Time Pilot runs with original or underclocked timings to normalize sync frequencies
 	input                underclock,
-	
+	input                pause,           //Freezes the sound CPU, both AY-3-8910s and their timer
+
 	input                ep7_cs_i,
 	input         [24:0] ioctl_addr,
 	input          [7:0] ioctl_data,
@@ -84,6 +85,8 @@ jtframe_frac_cen #(10) sound_cen
 	.m(sound_cen_m),
 	.cen({cen_timer, 8'bZZZZZZZZ, cen_1m79})
 );
+wire cen_snd = cen_1m79 & ~pause;
+wire cen_tmr = cen_timer & ~pause;
 
 //------------------------------------------------------------ CPU -------------------------------------------------------------//
 
@@ -95,7 +98,7 @@ T80s C8
 (
 	.RESET_n(reset),
 	.CLK(clk_49m),
-	.CEN(cen_1m79),
+	.CEN(cen_snd),
 	.INT_n(n_irq),
 	.M1_n(n_m1),
 	.MREQ_n(n_mreq),
@@ -205,7 +208,7 @@ always_comb begin
 end
 reg [3:0] timer = 4'd0;
 always_ff @(posedge clk_49m) begin
-	if(cen_timer) begin
+	if(cen_tmr) begin
 		timer <= timer_val;
 		timer_sel <= (timer_sel == 4'd9) ? 4'd0 : (timer_sel + 4'd1);
 	end
@@ -227,7 +230,7 @@ jt49_bus #(.COMP(3'b100)) F7
 (
 	.rst_n(reset),
 	.clk(clk_49m),
-	.clk_en(cen_1m79),
+	.clk_en(cen_snd),
 	.bdir(ay1_bdir),
 	.bc1(ay1_bc1),
 	.din(sound_Dout),
@@ -247,7 +250,7 @@ jt49_bus #(.COMP(3'b100)) F8
 (
 	.rst_n(reset),
 	.clk(clk_49m),
-	.clk_en(cen_1m79),
+	.clk_en(cen_snd),
 	.bdir(ay2_bdir),
 	.bc1(ay2_bc1),
 	.din(sound_Dout),
