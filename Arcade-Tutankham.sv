@@ -224,40 +224,59 @@ wire reset = RESET | status[0] | buttons[1];
 
 ///////////////////         Keyboard           //////////////////
 
-reg btn_up       = 0;
-reg btn_down     = 0;
-reg btn_left     = 0;
-reg btn_right    = 0;
-reg btn_fire     = 0;
-reg btn_coin1    = 0;
-reg btn_coin2    = 0;
-reg btn_1p_start = 0;
-reg btn_2p_start = 0;
-reg btn_pause    = 0;
-reg btn_service  = 0;
-
-wire pressed = ps2_key[9];
-wire [7:0] code = ps2_key[7:0];
-always @(posedge CLK_49M) begin
-	reg old_state;
-	old_state <= ps2_key[10];
-	if(old_state != ps2_key[10]) begin
-		case(code)
-			'h16: btn_1p_start <= pressed; // 1
-			'h1E: btn_2p_start <= pressed; // 2
-			'h2E: btn_coin1    <= pressed; // 5
-			'h36: btn_coin2    <= pressed; // 6
-			'h46: btn_service  <= pressed; // 9
-			'h4D: btn_pause    <= pressed; // P
-
-			'h75: btn_up      <= pressed; // up
-			'h72: btn_down    <= pressed; // down
-			'h6B: btn_left    <= pressed; // left
-			'h74: btn_right   <= pressed; // right
-			'h14: btn_fire    <= pressed; // ctrl
-		endcase
-	end
-end
+// CTL-2026-10-25: original keyboard block, replaced by ctl_keyboard below
+// reg btn_up       = 0;
+// reg btn_down     = 0;
+// reg btn_left     = 0;
+// reg btn_right    = 0;
+// reg btn_fire     = 0;
+// reg btn_coin1    = 0;
+// reg btn_coin2    = 0;
+// reg btn_1p_start = 0;
+// reg btn_2p_start = 0;
+// reg btn_pause    = 0;
+// reg btn_service  = 0;
+//
+// wire pressed = ps2_key[9];
+// wire [7:0] code = ps2_key[7:0];
+// always @(posedge CLK_49M) begin
+// 	reg old_state;
+// 	old_state <= ps2_key[10];
+// 	if(old_state != ps2_key[10]) begin
+// 		case(code)
+// 			'h16: btn_1p_start <= pressed; // 1
+// 			'h1E: btn_2p_start <= pressed; // 2
+// 			'h2E: btn_coin1    <= pressed; // 5
+// 			'h36: btn_coin2    <= pressed; // 6
+// 			'h46: btn_service  <= pressed; // 9
+// 			'h4D: btn_pause    <= pressed; // P
+//
+// 			'h75: btn_up      <= pressed; // up
+// 			'h72: btn_down    <= pressed; // down
+// 			'h6B: btn_left    <= pressed; // left
+// 			'h74: btn_right   <= pressed; // right
+// 			'h14: btn_fire    <= pressed; // ctrl
+// 		endcase
+// 	end
+// end
+// CTL-2026-10-25: keyboard -> controllers.sv ctl_keyboard (same 11 keys; extended bit ignored = STD_EXT 0, as before).
+// pause_cpu: no toggle keys here, so the keyboard behaves the same paused or not.
+wire        pause_cpu;   // CTL-2026-10-25: declared here (was in PAUSE SYSTEM below) so ctl_keyboard can take it
+wire [12:0] kb;
+/* verilator lint_off PINCONNECTEMPTY */
+ctl_keyboard keyboard(.clk(CLK_49M), .ps2_key(ps2_key), .pause(pause_cpu), .kb(kb), .kbx());
+/* verilator lint_on PINCONNECTEMPTY */
+wire btn_up       = kb[0];    // up
+wire btn_down     = kb[1];    // down
+wire btn_left     = kb[2];    // left
+wire btn_right    = kb[3];    // right
+wire btn_fire     = kb[4];    // ctrl
+wire btn_1p_start = kb[6];    // 1
+wire btn_2p_start = kb[7];    // 2
+wire btn_coin1    = kb[8];    // 5
+wire btn_coin2    = kb[9];    // 6
+wire btn_service  = kb[10];   // 9
+wire btn_pause    = kb[12];   // P
 
 //////////////////  Arcade Buttons/Interfaces   ///////////////////////////
 
@@ -268,9 +287,17 @@ wire m_left1    = btn_left    | joystick_0[1];
 wire m_right1   = btn_right   | joystick_0[0];
 
 //Right analog stick X decode - the cabinet's fire control was a 2-way (left/right) stick
-wire signed [7:0] rstick_x = joystick_r_analog_0[7:0];
-wire r_fire_left  = (rstick_x < -8'sd64);
-wire r_fire_right = (rstick_x >  8'sd64);
+// CTL-2026-10-25: original right-stick decode, replaced by ctl_stick_dirs below
+// wire signed [7:0] rstick_x = joystick_r_analog_0[7:0];
+// wire r_fire_left  = (rstick_x < -8'sd64);
+// wire r_fire_right = (rstick_x >  8'sd64);
+// CTL-2026-10-25: right-stick fire decode -> controllers.sv ctl_stick_dirs (X past +/-64, the same signed compares)
+/* verilator lint_off UNUSED */
+wire [3:0] rstick_dir;        // {U, D, L, R}; only L / R are used (2-way fire stick)
+/* verilator lint_on UNUSED */
+ctl_stick_dirs #(.MODE(0), .THRESH(7'd64)) rstick(.stick(joystick_r_analog_0), .dir(rstick_dir));
+wire r_fire_left  = rstick_dir[1];
+wire r_fire_right = rstick_dir[0];
 
 //Player 1 — 2-way fire joystick (B=fire left, A=fire right)
 wire m_fire1_l  = btn_fire    | joystick_0[4] | r_fire_left;    // B button or stick left
@@ -296,7 +323,7 @@ wire m_coin2    = btn_coin2;
 wire m_pause    = btn_pause    | joystick_0[10];   // L shoulder (handled by framework)
 
 // PAUSE SYSTEM
-wire pause_cpu;
+// wire pause_cpu;   // CTL-2026-10-25: moved up to the keyboard block
 wire [23:0] rgb_out;
 pause #(8,8,8,49) pause
 (
